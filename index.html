@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcolatore Rata Mutuo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .calculator-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .results {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            padding: 25px;
+            color: white;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .result-label {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .result-value {
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .monthly-payment {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .monthly-payment .result-value {
+            font-size: 24px;
+        }
+
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+            text-align: center;
+        }
+
+        .error.show {
+            display: block;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .partial-payment-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin-top: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .partial-payment-section h2 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        .partial-results {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            margin-top: 25px;
+        }
+
+        /* Tabella confronto unificata */
+        .comparison-table {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            overflow-x: auto;
+        }
+
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px 8px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .comparison-table th {
+            background: rgba(255, 255, 255, 0.15);
+            font-weight: 600;
+            font-size: 14px;
+            color: white;
+        }
+
+        .comparison-table td {
+            font-weight: 500;
+            font-size: 16px;
+            color: white;
+        }
+
+        .comparison-table .metric-label {
+            text-align: left;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .comparison-table .new-plan-column {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .comparison-table tr:last-child th,
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .savings-summary {
+            background: linear-gradient(135deg, #2ed573 0%, #17a2b8 100%);
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .savings-summary h4 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: white;
+        }
+
+        .savings-item {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .savings-item .result-label {
+            color: white;
+        }
+
+        .savings-value {
+            color: #fff !important;
+            font-weight: 800 !important;
+        }
+
+        .info-text {
+            text-align: center;
+            margin-top: 15px;
+            opacity: 0.9;
+        }
+
+        .info-text small {
+            font-size: 12px;
+            line-height: 1.4;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .input-suffix {
+            position: relative;
+        }
+
+        .input-suffix::after {
+            content: attr(data-suffix);
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-table {
+                font-size: 14px;
+            }
+            
+            .comparison-table th,
+            .comparison-table td {
+                padding: 8px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <h1>🏠 Calcolatore Rata Mutuo</h1>
+        
+        <form id="mortgageForm">
+            <div class="form-group">
+                <label for="loanAmount">Importo Totale Mutuo</label>
+                <div class="input-suffix" data-suffix="€">
+                    <input type="number" id="loanAmount" placeholder="es. 200000" min="1000" step="1000" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="loanTerm">Numero Rate (mesi)</label>
+                <input type="number" id="loanTerm" placeholder="es. 240 (20 anni)" min="12" max="600" required>
+            </div>
+
+            <div class="form-group">
+                <label for="interestRate">Tasso di Interesse Annuo</label>
+                <div class="input-suffix" data-suffix="%">
+                    <input type="number" id="interestRate" placeholder="es. 3.5" min="0.1" max="20" step="0.01" required>
+                </div>
+            </div>
+
+            <button type="submit" class="calculate-btn">💰 Calcola Rata</button>
+        </form>
+
+        <div id="partialPaymentSection" class="partial-payment-section" style="display: none;">
+            <h2>🔄 Rimborso Parziale</h2>
+            
+            <div class="form-group">
+                <label for="paidInstallments">Rate già pagate</label>
+                <input type="number" id="paidInstallments" placeholder="es. 60" min="1" max="600">
+            </div>
+
+            <div class="form-group">
+                <label for="partialPayment">Importo rimborso parziale</label>
+                <div class="input-suffix" data-suffix="€">
+                    <input type="number" id="partialPayment" placeholder="es. 50000" min="100" step="100">
+                </div>
+            </div>
+
+            <button type="button" class="calculate-btn" onclick="calculatePartialPayment()">🔄 Calcola Nuovo Piano</button>
+        </div>
+
+        <div id="results" class="results">
+            <div class="monthly-payment">
+                <div class="result-item">
+                    <span class="result-label">Rata Mensile</span>
+                    <span class="result-value" id="monthlyPayment">€0</span>
+                </div>
+            </div>
+            
+            <div class="result-item">
+                <span class="result-label">Totale Interessi</span>
+                <span class="result-value" id="totalInterest">€0</span>
+            </div>
+            
+            <div class="result-item">
+                <span class="result-label">Totale da Restituire</span>
+                <span class="result-value" id="totalAmount">€0</span>
+            </div>
+            
+            <div class="result-item">
+                <span class="result-label">Durata</span>
+                <span class="result-value" id="loanDuration">0 anni</span>
+            </div>
+        </div>
+
+        <div id="partialResults" class="results partial-results">
+            <h3 style="margin-bottom: 20px; text-align: center;">📊 Confronto Piano di Rimborso</h3>
+            
+            <div class="comparison-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Confronto</th>
+                            <th>Piano Originale</th>
+                            <th class="new-plan-column">Nuovo Piano</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="metric-label">Rata Mensile</td>
+                            <td id="originalMonthlyPayment">€0</td>
+                            <td class="new-plan-column" id="newMonthlyPayment">€0</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-label">Rate Rimanenti</td>
+                            <td id="originalRemainingPayments">0</td>
+                            <td class="new-plan-column" id="newRemainingPayments">0</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-label">Totale Interessi</td>
+                            <td id="originalTotalInterest">€0</td>
+                            <td class="new-plan-column" id="newTotalInterest">€0</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-label">Totale da Restituire</td>
+                            <td id="originalTotalAmount">€0</td>
+                            <td class="new-plan-column" id="newTotalAmount">€0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="savings-summary">
+                <h4>💰 Risparmio con Rimborso Parziale</h4>
+                <div class="result-item savings-item">
+                    <span class="result-label">Rimborso Anticipato</span>
+                    <span class="result-value" id="partialPaymentAmount">€0</span>
+                </div>
+                <div class="result-item savings-item">
+                    <span class="result-label">Risparmio Interessi</span>
+                    <span class="result-value savings-value" id="interestSavings">€0</span>
+                </div>
+                <div class="result-item savings-item">
+                    <span class="result-label">Riduzione Rata Mensile</span>
+                    <span class="result-value savings-value" id="paymentReduction">€0</span>
+                </div>
+                <div class="info-text">
+                    <small>💡 Il risparmio interessi rappresenta la differenza tra gli interessi che pagheresti senza e con il rimborso parziale</small>
+                </div>
+            </div>
+        </div>
+
+        <div id="error" class="error">
+            Inserisci tutti i campi con valori validi per calcolare la rata del mutuo.
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('mortgageForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            calculateMortgage();
+        });
+
+        let currentMortgageData = {};
+
+        function calculateMortgage() {
+            // Get input values
+            const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+            const loanTermMonths = parseInt(document.getElementById('loanTerm').value);
+            const annualInterestRate = parseFloat(document.getElementById('interestRate').value);
+
+            // Hide previous results and errors
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('partialResults').classList.remove('show');
+            document.getElementById('error').classList.remove('show');
+            document.getElementById('partialPaymentSection').style.display = 'none';
+
+            // Validate inputs
+            if (!loanAmount || !loanTermMonths || !annualInterestRate || 
+                loanAmount <= 0 || loanTermMonths <= 0 || annualInterestRate <= 0) {
+                document.getElementById('error').classList.add('show');
+                return;
+            }
+
+            // Calculate monthly interest rate
+            const monthlyInterestRate = (annualInterestRate / 100) / 12;
+
+            // Calculate monthly payment using French amortization formula
+            // M = C * [i(1+i)^n] / [(1+i)^n - 1]
+            // where C = capital, i = monthly interest rate, n = number of payments
+            let monthlyPayment;
+            
+            if (monthlyInterestRate === 0) {
+                // Special case for 0% interest
+                monthlyPayment = loanAmount / loanTermMonths;
+            } else {
+                const factor = Math.pow(1 + monthlyInterestRate, loanTermMonths);
+                monthlyPayment = loanAmount * (monthlyInterestRate * factor) / (factor - 1);
+            }
+
+            // Calculate totals
+            const totalAmount = monthlyPayment * loanTermMonths;
+            const totalInterest = totalAmount - loanAmount;
+            const loanDurationYears = Math.round((loanTermMonths / 12) * 10) / 10;
+
+            // Store current mortgage data for partial payment calculations
+            currentMortgageData = {
+                loanAmount,
+                loanTermMonths,
+                annualInterestRate,
+                monthlyInterestRate,
+                monthlyPayment,
+                totalAmount,
+                totalInterest
+            };
+
+            // Display results
+            document.getElementById('monthlyPayment').textContent = '€' + monthlyPayment.toLocaleString('it-IT', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+            document.getElementById('totalInterest').textContent = '€' + totalInterest.toLocaleString('it-IT', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+            document.getElementById('totalAmount').textContent = '€' + totalAmount.toLocaleString('it-IT', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+            document.getElementById('loanDuration').textContent = loanDurationYears + ' anni';
+
+            // Show results with animation
+            document.getElementById('results').classList.add('show');
+            
+            // Show partial payment section
+            document.getElementById('partialPaymentSection').style.display = 'block';
+            
+            // Set max values for partial payment inputs
+            document.getElementById('paidInstallments').max = loanTermMonths - 1;
+
+            // Add some visual feedback
+            document.querySelector('.calculate-btn').style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                document.querySelector('.calculate-btn').style.transform = 'scale(1)';
+            }, 150);
+        }
+
+        function calculatePartialPayment() {
+            const paidInstallments = parseInt(document.getElementById('paidInstallments').value);
+            const partialPayment = parseFloat(document.getElementById('partialPayment').value);
+
+            // Validate inputs
+            if (!paidInstallments || !partialPayment || 
+                paidInstallments <= 0 || partialPayment <= 0 ||
+                paidInstallments >= currentMortgageData.loanTermMonths) {
+                document.getElementById('error').textContent = 'Inserisci valori validi per le rate pagate e l\'importo del rimborso parziale.';
+                document.getElementById('error').classList.add('show');
+                return;
+            }
+
+            document.getElementById('error').classList.remove('show');
+
+            // Calculate remaining balance after paid installments
+            const { monthlyPayment, monthlyInterestRate, loanAmount } = currentMortgageData;
+            
+            // Calculate remaining principal using amortization schedule
+            let remainingBalance = loanAmount;
+            for (let i = 0; i < paidInstallments; i++) {
+                const interestPayment = remainingBalance * monthlyInterestRate;
+                const principalPayment = monthlyPayment - interestPayment;
+                remainingBalance -= principalPayment;
+            }
+
+            // Check if partial payment is not more than remaining balance
+            if (partialPayment > remainingBalance) {
+                document.getElementById('error').textContent = 'Il rimborso parziale non può essere superiore al debito residuo di €' + 
+                    remainingBalance.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                document.getElementById('error').classList.add('show');
+                return;
+            }
+
+            // Calculate new remaining balance after partial payment
+            const newRemainingBalance = remainingBalance - partialPayment;
+            const remainingMonths = currentMortgageData.loanTermMonths - paidInstallments;
+
+            // Calculate new monthly payment with same term
+            let newMonthlyPayment;
+            if (monthlyInterestRate === 0) {
+                newMonthlyPayment = newRemainingBalance / remainingMonths;
+            } else {
+                const factor = Math.pow(1 + monthlyInterestRate, remainingMonths);
+                newMonthlyPayment = newRemainingBalance * (monthlyInterestRate * factor) / (factor - 1);
+            }
+
+            // Calculate totals for comparison
+            const originalRemainingPayments = remainingMonths;
+            const originalRemainingTotal = monthlyPayment * originalRemainingPayments;
+            
+            const newRemainingTotal = newMonthlyPayment * remainingMonths;
+            const newTotalInterest = newRemainingTotal - newRemainingBalance;
+            
+            // Calculate what was already paid
+            const alreadyPaidTotal = monthlyPayment * paidInstallments;
+            const alreadyPaidInterest = alreadyPaidTotal - (loanAmount - remainingBalance);
+
+            // Original scenario totals (without partial payment)
+            const originalTotalInterest = alreadyPaidInterest + (originalRemainingTotal - remainingBalance);
+            const originalTotalAmount = loanAmount + originalTotalInterest;
+            
+            // New scenario totals (with partial payment)
+            const finalNewTotalInterest = alreadyPaidInterest + newTotalInterest;
+            const finalNewTotalAmount = loanAmount + finalNewTotalInterest; // This is the total cost of the loan
+
+            // Calculate savings
+            const interestSavings = originalTotalInterest - finalNewTotalInterest;
+            const totalSavings = interestSavings; // Total savings is just the interest savings
+            const paymentReduction = monthlyPayment - newMonthlyPayment;
+
+            // Display comparison results
+            document.getElementById('originalMonthlyPayment').textContent = '€' + monthlyPayment.toLocaleString('it-IT', {
+                minimumFractionDigits: 2, maximumFractionDigits: 2
+            });
+            document.getElementById('originalRemainingPayments').textContent = originalRemainingPayments;
+            document.getElementById('originalTotalInterest').textContent = '€' + originalTotalInterest.toLocaleString('it-IT', {
+                minimumFractionDigits: 2, maximumFractionDigits: 2
+            });
+            document.getElementById('originalTotalAmount').textContent = '€' + originalTotalAmount.toLocaleString('it-IT', {
+                minimumFractionDigits: 2, maximumFractionDigits: 2
+            });
+
+            document.getElementById('newMonthlyPayment').textContent = '€' + newMonthlyPayment.toLocaleString('it-IT', {
+                minimumFractionDigits: 2, maximumFractionDigits: 2
+            });
+            document.getElementById('newRemainingPayments').textContent = remainingMonths;
+            document.getElementById('newTotalInterest').textContent = '€' + finalNewTotalInterest.toLocaleString('it-IT', {
+                minimumFractionDigits: 2, maximumFractionDigits: 2
+            });
+            document.getElementById('newTotalAmount').textContent = '€' + finalNewTotalAmount.toLocaleString('it-IT', {
+                minimumFractionDigits: 2, maximumFractionDigits: 2
+            });
+
+            document.getElementById('partialPaymentAmount').textContent = '€' + partialPayment.toLocaleString('it-IT', {
+                minimumFractionDigits: 2, maximumFractionDigits: 2
+            });
+            document.getElementById('interestSavings').textContent = '€' + interestSavings.toLocaleString('it-IT', {
+                minimumFractionDigits: 2, maximumFractionDigits: 2
+            });
+            document.getElementById('paymentReduction').textContent = '€' + paymentReduction.toLocaleString('it-IT', {
+                minimumFractionDigits: 2, maximumFractionDigits: 2
+            });
+
+            // Show partial results
+            document.getElementById('partialResults').classList.add('show');
+        }
+
+        // Add input formatting for better UX
+        document.getElementById('loanAmount').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value) {
+                e.target.value = parseInt(value);
+            }
+        });
+
+        // Real-time calculation as user types (optional)
+        let calculationTimeout;
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', function() {
+                clearTimeout(calculationTimeout);
+                calculationTimeout = setTimeout(() => {
+                    const form = document.getElementById('mortgageForm');
+                    if (form.checkValidity()) {
+                        calculateMortgage();
+                    }
+                }, 1000);
+            });
+        });
+    </script>
+</body>
+</html>
